@@ -1,11 +1,12 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useContext } from 'react';
+import { ChakraProvider, Box, VStack, HStack, Button, Heading, Text } from '@chakra-ui/react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Calendar from 'react-calendar';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { format } from 'date-fns';
-import './App.css';
+import AuthContext from './contexts/AuthContext';
 
 function App() {
     const [selectedTab, setSelectedTab] = useState('builder');
@@ -14,13 +15,18 @@ function App() {
     const [websiteElements, setWebsiteElements] = useState([]);
     const [selectedDate, setSelectedDate] = useState(new Date());
 
-    const onDragEnd = useCallback((result) => {
-        if (!result.destination) return;
-        const items = Array.from(websiteElements);
-        const [reorderedItem] = items.splice(result.source.index, 1);
-        items.splice(result.destination.index, 0, reorderedItem);
-        setWebsiteElements(items);
-    }, [websiteElements]);
+    const { user } = useContext(AuthContext);
+
+    const onDragEnd = useCallback(
+        (result) => {
+            if (!result.destination) return;
+            const items = Array.from(websiteElements);
+            const [reorderedItem] = items.splice(result.source.index, 1);
+            items.splice(result.destination.index, 0, reorderedItem);
+            setWebsiteElements(items);
+        },
+        [websiteElements]
+    );
 
     const addWebsiteElement = (elementType) => {
         const newElement = {
@@ -50,160 +56,167 @@ function App() {
     };
 
     const renderBuilderTab = () => (
-        <div className="builder-container">
-            <div className="toolbar">
-                <button onClick={() => addWebsiteElement('section')}>Add Section</button>
-                <button onClick={() => addWebsiteElement('text')}>Add Text</button>
-                <button onClick={() => addWebsiteElement('image')}>Add Image</button>
-                <button onClick={() => addWebsiteElement('calendar')}>Add Calendar</button>
-            </div>
+        <Box>
+            <HStack spacing={4} mb={4}>
+                <Button onClick={() => addWebsiteElement('section')}>Add Section</Button>
+                <Button onClick={() => addWebsiteElement('text')}>Add Text</Button>
+                <Button onClick={() => addWebsiteElement('image')}>Add Image</Button>
+                <Button onClick={() => addWebsiteElement('calendar')}>Add Calendar</Button>
+            </HStack>
             <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="website-elements">
                     {(provided) => (
-                        <div
-                            className="preview-area"
+                        <VStack
+                            spacing={4}
+                            align="stretch"
                             {...provided.droppableProps}
                             ref={provided.innerRef}
                         >
                             {websiteElements.map((element, index) => (
-                                <Draggable
-                                    key={element.id}
-                                    draggableId={element.id}
-                                    index={index}
-                                >
+                                <Draggable key={element.id} draggableId={element.id} index={index}>
                                     {(provided) => (
-                                        <div
+                                        <Box
                                             ref={provided.innerRef}
                                             {...provided.draggableProps}
                                             {...provided.dragHandleProps}
-                                            className="website-element"
+                                            p={4}
+                                            borderWidth={1}
+                                            borderRadius="md"
                                         >
                                             {element.content}
-                                        </div>
+                                        </Box>
                                     )}
                                 </Draggable>
                             ))}
                             {provided.placeholder}
-                        </div>
+                        </VStack>
                     )}
                 </Droppable>
             </DragDropContext>
-        </div>
+        </Box>
     );
 
     const renderSchedulingTab = () => (
-        <div className="scheduling-container">
-            <div className="calendar-view">
-                <Calendar
-                    onChange={setSelectedDate}
-                    value={selectedDate}
-                    className="calendar"
-                />
-                <Formik
-                    initialValues={{
-                        title: '',
-                        date: format(selectedDate, 'yyyy-MM-dd'),
-                        time: '',
-                        clientId: ''
-                    }}
-                    validationSchema={Yup.object({
-                        title: Yup.string().required('Required'),
-                        time: Yup.string().required('Required'),
-                        clientId: Yup.string().required('Required')
-                    })}
-                    onSubmit={addAppointment}
-                >
-                    <Form className="appointment-form">
-                        <Field name="title" placeholder="Appointment Title" />
-                        <Field name="time" type="time" />
-                        <Field as="select" name="clientId">
-                            {clients.map((client) => (
-                                <option key={client.id} value={client.id}>
-                                    {client.name}
-                                </option>
-                            ))}
-                        </Field>
-                        <button type="submit">Add Appointment</button>
-                    </Form>
-                </Formik>
-                <div className="appointments-list">
-                    {appointments.map((appointment) => (
-                        <div key={appointment.id} className="appointment-card">
-                            <h3>{appointment.title}</h3>
-                            <p>{format(new Date(appointment.date), 'PPP')}</p>
-                            <p>{appointment.time}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
+        <Box>
+            <HStack spacing={8} align="flex-start">
+                <Box flex={1}>
+                    <Calendar onChange={setSelectedDate} value={selectedDate} />
+                </Box>
+                <VStack flex={1} spacing={4} align="stretch">
+                    <Formik
+                        initialValues={{
+                            title: '',
+                            date: format(selectedDate, 'yyyy-MM-dd'),
+                            time: '',
+                            clientId: ''
+                        }}
+                        validationSchema={Yup.object({
+                            title: Yup.string().required('Required'),
+                            time: Yup.string().required('Required'),
+                            clientId: Yup.string().required('Required')
+                        })}
+                        onSubmit={addAppointment}
+                    >
+                        <Form>
+                            <VStack spacing={4}>
+                                <Field name="title" placeholder="Appointment Title" />
+                                <Field name="time" type="time" />
+                                <Field as="select" name="clientId">
+                                    {clients.map((client) => (
+                                        <option key={client.id} value={client.id}>
+                                            {client.name}
+                                        </option>
+                                    ))}
+                                </Field>
+                                <Button type="submit">Add Appointment</Button>
+                            </VStack>
+                        </Form>
+                    </Formik>
+                    <VStack spacing={4} align="stretch">
+                        {appointments.map((appointment) => (
+                            <Box key={appointment.id} p={4} borderWidth={1} borderRadius="md">
+                                <Heading size="sm">{appointment.title}</Heading>
+                                <Text>{format(new Date(appointment.date), 'PPP')}</Text>
+                                <Text>{appointment.time}</Text>
+                            </Box>
+                        ))}
+                    </VStack>
+                </VStack>
+            </HStack>
+        </Box>
     );
 
     const renderClientsTab = () => (
-        <div className="clients-container">
-            <Formik
-                initialValues={{
-                    name: '',
-                    email: '',
-                    phone: ''
-                }}
-                validationSchema={Yup.object({
-                    name: Yup.string().required('Required'),
-                    email: Yup.string().email('Invalid email').required('Required'),
-                    phone: Yup.string().required('Required')
-                })}
-                onSubmit={addClient}
-            >
-                <Form className="client-form">
-                    <Field name="name" placeholder="Client Name" />
-                    <Field name="email" type="email" placeholder="Email" />
-                    <Field name="phone" placeholder="Phone" />
-                    <button type="submit">Add Client</button>
-                </Form>
-            </Formik>
-            <div className="clients-list">
-                {clients.map((client) => (
-                    <div key={client.id} className="client-card">
-                        <h3>{client.name}</h3>
-                        <p>{client.email}</p>
-                        <p>{client.phone}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
+        <Box>
+            <HStack spacing={8} align="flex-start">
+                <Box flex={1}>
+                    <Formik
+                        initialValues={{
+                            name: '',
+                            email: '',
+                            phone: ''
+                        }}
+                        validationSchema={Yup.object({
+                            name: Yup.string().required('Required'),
+                            email: Yup.string().email('Invalid email').required('Required'),
+                            phone: Yup.string().required('Required')
+                        })}
+                        onSubmit={addClient}
+                    >
+                        <Form>
+                            <VStack spacing={4}>
+                                <Field name="name" placeholder="Client Name" />
+                                <Field name="email" type="email" placeholder="Email" />
+                                <Field name="phone" placeholder="Phone" />
+                                <Button type="submit">Add Client</Button>
+                            </VStack>
+                        </Form>
+                    </Formik>
+                </Box>
+                <VStack flex={1} spacing={4} align="stretch">
+                    {clients.map((client) => (
+                        <Box key={client.id} p={4} borderWidth={1} borderRadius="md">
+                            <Heading size="sm">{client.name}</Heading>
+                            <Text>{client.email}</Text>
+                            <Text>{client.phone}</Text>
+                        </Box>
+                    ))}
+                </VStack>
+            </HStack>
+        </Box>
     );
 
     return (
-        <div className="app-container">
-            <nav className="main-nav">
-                <button
-                    className={`nav-button ${selectedTab === 'builder' ? 'active' : ''}`}
+        <Box minHeight="100vh">
+            <HStack as="nav" spacing={4} p={4} bg="gray.100">
+                <Button
                     onClick={() => setSelectedTab('builder')}
+                    variant={selectedTab === 'builder' ? 'solid' : 'ghost'}
                 >
                     Website Builder
-                </button>
-                <button
-                    className={`nav-button ${selectedTab === 'scheduling' ? 'active' : ''}`}
+                </Button>
+                <Button
                     onClick={() => setSelectedTab('scheduling')}
+                    variant={selectedTab === 'scheduling' ? 'solid' : 'ghost'}
                 >
                     Scheduling
-                </button>
-                <button
-                    className={`nav-button ${selectedTab === 'clients' ? 'active' : ''}`}
+                </Button>
+                <Button
                     onClick={() => setSelectedTab('clients')}
+                    variant={selectedTab === 'clients' ? 'solid' : 'ghost'}
                 >
                     Clients
-                </button>
-            </nav>
-            <main className="main-content">
+                </Button>
+            </HStack>
+            <Box p={8}>
                 {selectedTab === 'builder' && renderBuilderTab()}
                 {selectedTab === 'scheduling' && renderSchedulingTab()}
                 {selectedTab === 'clients' && renderClientsTab()}
-            </main>
-            <footer className="app-footer">
-                <p>Business Scheduling Website Builder - MVP Version</p>
-            </footer>
-        </div>
+            </Box>
+            <Box as="footer" textAlign="center" p={4} bg="gray.100">
+                <Text>Business Scheduling Website Builder - MVP Version</Text>
+            </Box>
+        </Box>
     );
 }
 

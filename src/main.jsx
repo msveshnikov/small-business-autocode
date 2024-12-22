@@ -1,12 +1,12 @@
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { store } from './store';
+import { ChakraProvider, ColorModeScript } from '@chakra-ui/react';
+import store from './store.jsx';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import './index.css';
 import App from './App';
 
 const router = createBrowserRouter([
@@ -46,20 +46,24 @@ const root = createRoot(document.getElementById('root'));
 
 root.render(
     <Provider store={store}>
-        <AuthProvider>
-            <ThemeProvider>
-                <RouterProvider router={router} />
-                <ToastContainer
-                    position="bottom-right"
-                    autoClose={5000}
-                    hideProgressBar={false}
-                    newestOnTop
-                    closeOnClick
-                    pauseOnFocusLoss
-                    draggable
-                    pauseOnHover
-                />
-            </ThemeProvider>
-        </AuthProvider>
+        <ChakraProvider>
+            <ColorModeScript initialColorMode="light" />
+            <AuthProvider>
+                <ThemeProvider>
+                    <RouterProvider router={router} />
+                    <ToastContainer
+                        position="bottom-right"
+                        autoClose={5000}
+                        hideProgressBar={false}
+                        newestOnTop
+                        closeOnClick
+                        pauseOnFocusLoss
+                        draggable
+                        pauseOnHover
+                        theme="colored"
+                    />
+                </ThemeProvider>
+            </AuthProvider>
+        </ChakraProvider>
     </Provider>
 );
