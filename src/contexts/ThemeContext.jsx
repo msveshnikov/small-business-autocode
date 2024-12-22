@@ -1,4 +1,4 @@
-import  { createContext, useState, useContext, useCallback } from 'react';
+import { createContext, useState, useContext, useCallback } from 'react';
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 
 const ThemeContext = createContext();
