@@ -78,3 +78,16 @@ businesses.
 - Website uptime
 - Support ticket resolution time
 - User satisfaction score
+
+# Domains
+
+Schedulr.com: Simple, direct, and clearly communicates the core function.
+Bookly.com: Easy to remember and suggests a focus on booking appointments.
+TimeTap.com: Modern, implies quick and efficient scheduling.
+MySchedulSite.com: Clearly indicates it's a scheduling website builder.
+EasyAppoint.com: Highlights the ease of making appointments.
+ServiceBooker.com: Directly related to the target market (service-based businesses).
+ZenithSched.com: "Zenith" implies peak performance, suggesting an excellent scheduling solution.
+FlowBooker.com: "Flow" suggests smooth and efficient booking and business operations.
+ClaritySched.com: "Clarity" implies a clear and organized scheduling system.
+SalonTime.com: While it directly targets one of your key markets, it might limit your appeal to others. Consider a more general term unless you plan to niche down
